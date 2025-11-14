@@ -1,0 +1,41 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- [ ]  Plan Migration
+
+Silver to Silver plus to Gold ( Non reversible, only upgraded)
+
+Note: once choose, only remaining points will be carry forwarded,ex : if Silver plan has 1500 points balance only that will be carry forwarded
+
+NOTE: Not Applicable to Non Membership plan
+
+- [ ]  Menu sequence
+
+Home, Book An Appointment, Service, Staff, Customers, Membership, Credit, Dashboard, Invoice,Reports
+
+- [ ]  Reports _ password enabled, only Amin can see
+- [ ]  Rest Manger Access
+- [ ]  Landing page should start with BOOK AN APPOINTMENT
+- [ ]  Landing page Non Membership should appear at the beginning and then Membership plan.
+- [ ]  Book an Appointment page
+
+There are 2 blocks, first will be BAA and below that Staff should appear, if client is filling the form ,he or she can view below which staff is available, he can edit below staff and book instantly
+
+ 
+
+- [ ]  Book Now
+
+When he book a service ,multiple selection option will be there like after selecting one service, he can able to add one more service.Once appoinement is done, it will list on pending service and after service he can generate an invoice just by click print
+
+- [ ]  Non Membership Plan
+
+Add 2 more plans 30,000 and 50,000. 35% and 50% respectively.
+
+Do not add 400 rupees to  Credit balance , it is fixed. 
+
+- [ ]  After selecting any plan it should goto customers asking existing or new and then process.Also customer can add his beneficiary or goto next book an appointment.
+- [ ]  Delete should be password protected
+- [ ]  Staff:  Available / Non Available simple box table with Service boy or girl name, time slot with color indicator, once blocked, cannot open until timer
+- [ ]  [.](http://ends.Report)Report  of working …how many hours worked, how many clients handled with name, how much money of the service he offered, idle time ,performance percentage etc
