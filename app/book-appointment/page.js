@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
+import SalonLayout from '../components/SalonLayout';
 import BookingStaffAvailability from '../components/BookingStaffAvailability';
 import { useAuth } from '../../lib/auth';
 import { useRouter } from 'next/navigation';
@@ -894,9 +894,7 @@ export default function BookAppointment() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-900 dark:to-purple-900">
-      <Navbar />
-      
+    <SalonLayout currentPage="Book An Appointment">
       <main className="container mx-auto py-10 px-4">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">Book an Appointment</h1>
         
@@ -1243,6 +1241,6 @@ export default function BookAppointment() {
           </>
         )}
       </main>
-    </div>
+    </SalonLayout>
   );
 } 

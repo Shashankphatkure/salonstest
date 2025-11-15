@@ -2,9 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '../components/Navbar';
+import SalonLayout from '../components/SalonLayout';
 import { useAuth } from '../../lib/auth';
 import { getProducts, getCustomers, createCustomer, createOrder } from '../../lib/db';
+import { ShoppingCart, User, Package, Printer, CheckCircle, Search, X, Plus, Minus } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function SalesPage() {
   const { user } = useAuth();
@@ -31,15 +40,15 @@ export default function SalesPage() {
     async function fetchData() {
       try {
         setLoading(true);
-        
+
         // Fetch products
         const productsData = await getProducts();
         setProducts(productsData);
-        
+
         // Fetch customers
         const customersData = await getCustomers();
         setCustomers(customersData);
-        
+
         setLoading(false);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -47,7 +56,7 @@ export default function SalesPage() {
         setLoading(false);
       }
     }
-    
+
     fetchData();
   }, [user]);
 
@@ -67,7 +76,7 @@ export default function SalesPage() {
   );
 
   // Filter customers based on search query
-  const filteredCustomers = customers.filter(customer => 
+  const filteredCustomers = customers.filter(customer =>
     customer.name.toLowerCase().includes(customerSearchQuery.toLowerCase()) ||
     customer.phone.toLowerCase().includes(customerSearchQuery.toLowerCase())
   );
@@ -81,8 +90,8 @@ export default function SalesPage() {
   };
 
   // Handle radio button change for customer type
-  const handleCustomerTypeChange = (e) => {
-    const isExisting = e.target.value === 'existing';
+  const handleCustomerTypeChange = (value) => {
+    const isExisting = value === 'existing';
     setIsExistingCustomer(isExisting);
     if (!isExisting) {
       // Reset customer data when switching to new customer
@@ -113,6 +122,20 @@ export default function SalesPage() {
     setProductQuantities({ ...productQuantities, [productId]: parseInt(quantity) });
   };
 
+  // Increment quantity
+  const incrementQuantity = (productId) => {
+    const currentQuantity = productQuantities[productId] || 1;
+    updateProductQuantity(productId, currentQuantity + 1);
+  };
+
+  // Decrement quantity
+  const decrementQuantity = (productId) => {
+    const currentQuantity = productQuantities[productId] || 1;
+    if (currentQuantity > 1) {
+      updateProductQuantity(productId, currentQuantity - 1);
+    }
+  };
+
   // Remove product from selection
   const removeProduct = (productId) => {
     setSelectedProducts(selectedProducts.filter(p => p.id !== productId));
@@ -124,19 +147,19 @@ export default function SalesPage() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (selectedProducts.length === 0) {
       setError('Please select at least one product');
       return;
     }
-    
+
     try {
       setLoading(true);
-      
+
       // Handle customer data
       let customerId = null;
       let customerInfo = null;
-      
+
       if (selectedCustomer) {
         // Use existing customer
         customerId = selectedCustomer.id;
@@ -151,7 +174,7 @@ export default function SalesPage() {
             join_date: currentDate,
             last_visit: currentDate
           };
-          
+
           const createdCustomer = await createCustomer(newCustomer);
           customerId = createdCustomer.id;
           customerInfo = createdCustomer;
@@ -162,26 +185,26 @@ export default function SalesPage() {
           return;
         }
       }
-      
+
       // Prepare order data
       const orderData = {
         customer_id: customerId,
         total_amount: orderTotal,
         status: 'completed'
       };
-      
+
       // Prepare order items
       const orderItems = selectedProducts.map(product => ({
         product_id: product.id,
         quantity: productQuantities[product.id] || 1,
         price: parseFloat(product.price)
       }));
-      
+
       // Create the order
       const order = await createOrder(orderData, orderItems);
       setOrderResult(order);
       setSuccess(true);
-      
+
       // Reset form
       setSelectedProducts([]);
       setProductQuantities({});
@@ -189,7 +212,7 @@ export default function SalesPage() {
       setCustomerName('');
       setCustomerPhone('');
       setIsExistingCustomer(false);
-      
+
       setLoading(false);
     } catch (err) {
       console.error('Error creating sale:', err);
@@ -206,10 +229,10 @@ export default function SalesPage() {
       month: 'long',
       day: 'numeric'
     });
-    
+
     // Create a new window for the invoice
     const invoiceWindow = window.open('', '_blank');
-    
+
     // Generate the invoice HTML
     const invoiceHtml = `
       <!DOCTYPE html>
@@ -301,7 +324,7 @@ export default function SalesPage() {
               <div>Invoice #: INV-S-${Math.floor(Math.random() * 10000)}</div>
             </div>
           </div>
-          
+
           <div class="invoice-details">
             <div class="customer-details">
               <h3>BILL TO:</h3>
@@ -309,7 +332,7 @@ export default function SalesPage() {
               <div>${orderResult?.customers?.phone || ''}</div>
             </div>
           </div>
-          
+
           <table>
             <thead>
               <tr>
@@ -334,12 +357,12 @@ export default function SalesPage() {
               </tr>
             </tbody>
           </table>
-          
+
           <div class="footer">
             <p>Thank you for your business! We look forward to seeing you again.</p>
             ${orderResult?.customers?.membership_type ? `<p>Membership Plan: ${orderResult.customers.membership_type}</p>` : ''}
           </div>
-          
+
           <div class="no-print" style="margin-top: 30px; text-align: center;">
             <button onclick="window.print();" style="padding: 10px 20px; background: #512da8; color: white; border: none; border-radius: 4px; cursor: pointer;">
               Print Invoice
@@ -349,7 +372,7 @@ export default function SalesPage() {
       </body>
       </html>
     `;
-    
+
     // Write the HTML to the new window and print
     invoiceWindow.document.open();
     invoiceWindow.document.write(invoiceHtml);
@@ -357,326 +380,320 @@ export default function SalesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-900 dark:to-purple-900">
-      <Navbar />
-      
+    <SalonLayout currentPage="Sales">
       <main className="container mx-auto py-10 px-4">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">Create Sale</h1>
-        
+        <div className="flex items-center gap-3 mb-8">
+          <ShoppingCart className="h-8 w-8 text-purple-600" />
+          <h1 className="text-3xl font-bold">Create Sale</h1>
+        </div>
+
         {loading && !success ? (
-          <div className="max-w-4xl mx-auto text-center py-20">
+          <div className="flex flex-col items-center justify-center py-20">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-300">Loading products and customers...</p>
+            <p className="mt-4 text-muted-foreground">Loading products and customers...</p>
           </div>
         ) : success ? (
-          <div className="max-w-xl mx-auto bg-green-50 dark:bg-green-900/30 border-l-4 border-green-500 p-6 rounded-lg">
-            <h2 className="text-2xl font-bold text-green-700 dark:text-green-400 mb-2">Sale Created Successfully!</h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Thank you for shopping at Hair & Care Unisex Salon. Your sale has been recorded.
-            </p>
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setSuccess(false)} 
-                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-              >
+          <Card className="max-w-xl mx-auto border-green-500 bg-green-50 dark:bg-green-900/20">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <CardTitle className="text-green-700 dark:text-green-400">Sale Created Successfully!</CardTitle>
+              </div>
+              <CardDescription className="text-green-600 dark:text-green-300">
+                Thank you for shopping. Your sale has been recorded.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex gap-4">
+              <Button onClick={() => setSuccess(false)}>
                 Create Another Sale
-              </button>
-              <button 
-                onClick={handlePrintInvoice} 
-                className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-              >
+              </Button>
+              <Button variant="outline" onClick={handlePrintInvoice}>
+                <Printer className="mr-2 h-4 w-4" />
                 Print Invoice
-              </button>
-            </div>
-          </div>
+              </Button>
+            </CardContent>
+          </Card>
         ) : (
           <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-6">
               {/* Customer Section */}
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Customer Information</h2>
-                
-                {error && (
-                  <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 p-4 mb-4">
-                    <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <User className="h-5 w-5 text-purple-600" />
+                    <CardTitle>Customer Information</CardTitle>
                   </div>
-                )}
-                
-                {/* Customer Type Selection */}
-                <div className="mb-4">
-                  <div className="flex items-center space-x-6">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="customerType"
-                        value="new"
-                        checked={!isExistingCustomer}
-                        onChange={handleCustomerTypeChange}
-                        className="h-4 w-4 text-purple-600 border-gray-300 focus:ring-purple-500"
-                      />
-                      <span className="ml-2 text-gray-700 dark:text-gray-300">New Customer</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="customerType"
-                        value="existing"
-                        checked={isExistingCustomer}
-                        onChange={handleCustomerTypeChange}
-                        className="h-4 w-4 text-purple-600 border-gray-300 focus:ring-purple-500"
-                      />
-                      <span className="ml-2 text-gray-700 dark:text-gray-300">Existing Customer</span>
-                    </label>
-                  </div>
-                </div>
-                
-                {isExistingCustomer ? (
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <label className="block text-gray-700 dark:text-gray-300 mb-1">Search Customer</label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={customerSearchQuery}
-                          onChange={(e) => {
-                            setCustomerSearchQuery(e.target.value);
-                            setShowCustomerSearch(true);
-                          }}
-                          onClick={() => setShowCustomerSearch(true)}
-                          className="w-full p-2 pl-8 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                          placeholder="Search by name or phone"
-                        />
-                        <svg
-                          className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400 dark:text-gray-500"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      </div>
-                      
-                      {/* Customer search results dropdown */}
-                      {showCustomerSearch && (
-                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 shadow-lg rounded-md max-h-60 overflow-y-auto">
-                          {filteredCustomers.length > 0 ? (
-                            filteredCustomers.map(customer => (
-                              <div
-                                key={customer.id}
-                                className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
-                                onClick={() => selectCustomer(customer)}
-                              >
-                                <div className="font-medium text-gray-800 dark:text-white">{customer.name}</div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">
-                                  {customer.phone}
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="px-4 py-2 text-gray-500 dark:text-gray-400">
-                              No customers found
-                            </div>
-                          )}
-                        </div>
-                      )}
+                  <CardDescription>Select existing or add new customer</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Customer Type Selection */}
+                  <RadioGroup
+                    value={isExistingCustomer ? 'existing' : 'new'}
+                    onValueChange={handleCustomerTypeChange}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="new" id="new" />
+                      <Label htmlFor="new">New Customer</Label>
                     </div>
-                    
-                    {selectedCustomer && (
-                      <div className="p-3 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800">
-                        <div className="font-medium text-gray-800 dark:text-white">{selectedCustomer.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {selectedCustomer.phone}
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="existing" id="existing" />
+                      <Label htmlFor="existing">Existing Customer</Label>
+                    </div>
+                  </RadioGroup>
+
+                  {isExistingCustomer ? (
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <Label>Search Customer</Label>
+                        <div className="relative mt-1">
+                          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            type="text"
+                            value={customerSearchQuery}
+                            onChange={(e) => {
+                              setCustomerSearchQuery(e.target.value);
+                              setShowCustomerSearch(true);
+                            }}
+                            onClick={() => setShowCustomerSearch(true)}
+                            className="pl-9"
+                            placeholder="Search by name or phone"
+                          />
                         </div>
-                        {selectedCustomer.membership_type && (
-                          <div className="mt-1">
-                            <span className="px-2 py-1 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full">
-                              {selectedCustomer.membership_type}
-                            </span>
+
+                        {/* Customer search results dropdown */}
+                        {showCustomerSearch && (
+                          <div className="absolute z-10 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                            {filteredCustomers.length > 0 ? (
+                              filteredCustomers.map(customer => (
+                                <div
+                                  key={customer.id}
+                                  className="px-4 py-2 hover:bg-accent cursor-pointer"
+                                  onClick={() => selectCustomer(customer)}
+                                >
+                                  <div className="font-medium">{customer.name}</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {customer.phone}
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="px-4 py-2 text-muted-foreground">
+                                No customers found
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                      <input 
-                        type="text" 
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        placeholder="Customer's full name"
-                        required
-                      />
+
+                      {selectedCustomer && (
+                        <Card className="bg-muted/50">
+                          <CardContent className="pt-4">
+                            <div className="font-medium">{selectedCustomer.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {selectedCustomer.phone}
+                            </div>
+                            {selectedCustomer.membership_type && (
+                              <Badge variant="secondary" className="mt-2">
+                                {selectedCustomer.membership_type}
+                              </Badge>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
-                    
-                    <div>
-                      <label className="block text-gray-700 dark:text-gray-300 mb-1">Phone</label>
-                      <input 
-                        type="tel" 
-                        value={customerPhone}
-                        onChange={(e) => setCustomerPhone(e.target.value)}
-                        className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        placeholder="Customer's phone number"
-                        required
-                      />
+                  ) : (
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                          id="name"
+                          type="text"
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                          placeholder="Customer's full name"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={customerPhone}
+                          onChange={(e) => setCustomerPhone(e.target.value)}
+                          placeholder="Customer's phone number"
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-              
+                  )}
+                </CardContent>
+              </Card>
+
               {/* Products Section */}
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Select Products</h2>
-                
-                <div className="mb-3">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Package className="h-5 w-5 text-purple-600" />
+                    <CardTitle>Select Products</CardTitle>
+                  </div>
+                  <CardDescription>Choose products to include in sale</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div className="relative">
-                    <input 
-                      type="text" 
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
                       value={productSearchQuery}
                       onChange={(e) => setProductSearchQuery(e.target.value)}
-                      className="w-full p-2 pl-8 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="pl-9"
                       placeholder="Search products..."
                     />
-                    <svg 
-                      className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400 dark:text-gray-500" 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
                   </div>
-                </div>
-                
-                <div className="space-y-3 max-h-60 overflow-y-auto p-2 border border-gray-200 dark:border-gray-700 rounded-lg mb-4">
-                  {filteredProducts.length > 0 ? (
-                    filteredProducts.map(product => (
-                      <div 
-                        key={product.id}
-                        className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
-                          selectedProducts.some(p => p.id === product.id)
-                            ? 'bg-purple-100 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700'
-                            : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                        }`}
-                        onClick={() => toggleProductSelection(product)}
-                      >
-                        <input 
-                          type="checkbox"
-                          checked={selectedProducts.some(p => p.id === product.id)}
-                          onChange={() => {}}
-                          className="h-4 w-4 text-purple-600 rounded border-gray-300 dark:border-gray-700 focus:ring-purple-500"
-                        />
-                        <div className="ml-3 flex-1">
-                          <h4 className="font-medium text-gray-700 dark:text-gray-300">{product.title}</h4>
-                          <div className="flex justify-end">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              ₹{parseFloat(product.price).toLocaleString()}
-                            </span>
+
+                  <div className="space-y-2 max-h-60 overflow-y-auto p-2 border rounded-lg">
+                    {filteredProducts.length > 0 ? (
+                      filteredProducts.map(product => (
+                        <div
+                          key={product.id}
+                          className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                            selectedProducts.some(p => p.id === product.id)
+                              ? 'bg-purple-100 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700'
+                              : 'hover:bg-accent'
+                          }`}
+                          onClick={() => toggleProductSelection(product)}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.some(p => p.id === product.id)}
+                            onChange={() => {}}
+                            className="h-4 w-4 rounded border-input"
+                          />
+                          <div className="ml-3 flex-1">
+                            <h4 className="font-medium">{product.title}</h4>
+                            <div className="flex justify-end">
+                              <span className="text-sm font-medium">
+                                ₹{parseFloat(product.price).toLocaleString()}
+                              </span>
+                            </div>
                           </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No products found
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-center py-4 text-gray-500 dark:text-gray-400">No products found matching your search.</p>
-                  )}
-                </div>
-              </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-            
+
             {/* Selected Products Summary */}
             {selectedProducts.length > 0 && (
-              <div className="mt-8 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Sale Summary</h2>
-                
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Product
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Price
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Quantity
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Total
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                      {selectedProducts.map(product => {
-                        const quantity = productQuantities[product.id] || 1;
-                        const total = parseFloat(product.price) * quantity;
-                        
-                        return (
-                          <tr key={product.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                              {product.title}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                              ₹{parseFloat(product.price).toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                              <input
-                                type="number"
-                                min="1"
-                                value={quantity}
-                                onChange={(e) => updateProductQuantity(product.id, e.target.value)}
-                                className="w-16 p-1 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                              ₹{total.toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <button
-                                type="button"
-                                onClick={() => removeProduct(product.id)}
-                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                              >
-                                Remove
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      <tr className="bg-gray-50 dark:bg-gray-700">
-                        <td colSpan="3" className="px-6 py-4 text-right text-sm font-bold text-gray-900 dark:text-white">
-                          Total
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
-                          ₹{orderTotal.toLocaleString()}
-                        </td>
-                        <td></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                
-                <div className="mt-8 flex justify-end">
-                  <button 
-                    type="submit" 
-                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg disabled:opacity-50"
-                    disabled={loading || selectedProducts.length === 0}
-                  >
-                    {loading ? 'Processing...' : 'Complete Sale'}
-                  </button>
-                </div>
-              </div>
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Sale Summary</CardTitle>
+                  <CardDescription>Review order details before completing</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Product</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Quantity</TableHead>
+                          <TableHead>Total</TableHead>
+                          <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedProducts.map(product => {
+                          const quantity = productQuantities[product.id] || 1;
+                          const total = parseFloat(product.price) * quantity;
+
+                          return (
+                            <TableRow key={product.id}>
+                              <TableCell className="font-medium">
+                                {product.title}
+                              </TableCell>
+                              <TableCell>
+                                ₹{parseFloat(product.price).toLocaleString()}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => decrementQuantity(product.id)}
+                                  >
+                                    <Minus className="h-4 w-4" />
+                                  </Button>
+                                  <span className="w-12 text-center">{quantity}</span>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => incrementQuantity(product.id)}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                ₹{total.toLocaleString()}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeProduct(product.id)}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                        <TableRow className="bg-muted/50">
+                          <TableCell colSpan={3} className="text-right font-bold">
+                            Total
+                          </TableCell>
+                          <TableCell className="font-bold">
+                            ₹{orderTotal.toLocaleString()}
+                          </TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  <div className="mt-6 flex justify-end">
+                    <Button
+                      type="submit"
+                      disabled={loading || selectedProducts.length === 0}
+                    >
+                      {loading ? 'Processing...' : 'Complete Sale'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </form>
         )}
       </main>
-    </div>
+    </SalonLayout>
   );
-} 
+}

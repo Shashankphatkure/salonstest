@@ -12,12 +12,12 @@ export default function Navbar() {
   // Menu items in the specified sequence
   const menuItems = [
     { href: '/', label: 'Home' },
-    { href: '/book-appointment', label: 'Book An Appointment' },
+    { href: '/book-appointment', label: 'Book' },
     { href: '/sales', label: 'Sales' },
     { href: '/services', label: 'Service' },
     { href: '/staff', label: 'Operator' },
     { href: '/customers', label: 'Customers' },
-    { href: '/client-history', label: 'Client History' },
+    { href: '/client-history', label: 'History' },
     { href: '/notifications', label: 'Notifications', hasNotifications: true },
     { href: '/membership', label: 'Membership' },
     { href: '/credit', label: 'Credit' },
@@ -55,8 +55,7 @@ export default function Navbar() {
   return (
     <header className="p-4 md:p-6 flex items-center justify-between border-b bg-white dark:bg-gray-800 shadow-sm relative z-20">
       <Link href="/dashboard" className="flex items-center gap-2">
-        <img src="/logo.png" alt="Salon Logo" className="h-12 w-12" />
-        <h2 className="text-xs md:text-xl font-bold text-purple-800 dark:text-purple-300">Hair & Care</h2>
+        <img src="/logo2.png" alt="Glam CRM Logo" className="h-12 w-auto bg-white rounded" />
       </Link>
       
       {/* Desktop menu */}

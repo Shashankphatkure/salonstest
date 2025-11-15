@@ -60,7 +60,7 @@ export default function UserMenu() {
           )}
         </div>
         <span className="text-sm font-medium hidden md:inline-block">
-          {user ? user.email : 'Account'}
+          Account
         </span>
         <svg
           className="h-5 w-5"
@@ -82,12 +82,6 @@ export default function UserMenu() {
           <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
             {user ? (
               <>
-                <span className="block px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
-                  Signed in as:
-                  <br />
-                  <span className="font-medium text-gray-900 dark:text-white">{user.email}</span>
-                </span>
-                <div className="border-t border-gray-100 dark:border-gray-700"></div>
                 <Link href="/dashboard" passHref>
                   <span 
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"

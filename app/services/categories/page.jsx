@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Navbar from '../../components/Navbar';
+import SalonLayout from '../../components/SalonLayout';
 import { getServices, updateService, createService } from '../../../lib/db';
 
 export default function CategoriesManagement() {
@@ -153,21 +153,18 @@ export default function CategoriesManagement() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-900 dark:to-purple-900">
-        <Navbar />
+      <SalonLayout currentPage="Service">
         <div className="container mx-auto py-10 px-4 text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-300">Loading categories...</p>
         </div>
-      </div>
+      </SalonLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-900 dark:to-purple-900">
-      <Navbar />
-
-      <div className="container mx-auto py-10 px-4">
+    <SalonLayout currentPage="Service">
+      <main className="container mx-auto py-10 px-4">
         <div className="mb-6 flex justify-between items-center">
           <div>
             <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Manage Categories</h2>
@@ -295,7 +292,7 @@ export default function CategoriesManagement() {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
@@ -329,13 +326,6 @@ export default function CategoriesManagement() {
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 mt-20 py-8 border-t">
-        <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400 text-sm">
-          <p>© {new Date().getFullYear()} Hair & Care Unisex Salon. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+    </SalonLayout>
   );
 } 

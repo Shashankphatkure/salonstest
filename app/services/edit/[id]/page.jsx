@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '../../../components/Navbar';
+import SalonLayout from '../../../components/SalonLayout';
 import { getServiceById, updateService, getServices } from '../../../../lib/db';
 
 export default function EditService({ params }) {
@@ -84,22 +84,18 @@ export default function EditService({ params }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-900 dark:to-purple-900">
-        <Navbar />
+      <SalonLayout currentPage="Service">
         <div className="container mx-auto py-20 text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-300">Loading service details...</p>
         </div>
-      </div>
+      </SalonLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-900 dark:to-purple-900">
-      {/* Use the shared Navbar component */}
-      <Navbar />
-
-      <div className="container mx-auto py-10 px-4">
+    <SalonLayout currentPage="Service">
+      <main className="container mx-auto py-10 px-4">
         <div className="mb-6">
           <Link href="/services" className="text-purple-600 hover:text-purple-800 dark:text-purple-300 dark:hover:text-purple-100 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -215,14 +211,7 @@ export default function EditService({ params }) {
             </div>
           </form>
         </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 mt-20 py-8 border-t">
-        <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400 text-sm">
-          <p>© {new Date().getFullYear()} Hair & Care Unisex Salon. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+      </main>
+    </SalonLayout>
   );
 } 

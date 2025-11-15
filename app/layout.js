@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Hair & Care Unisex Salon Dashboard",
+  title: "Salon Dashboard",
   description: "Manage salon memberships, services, and customer tracking",
 };
 

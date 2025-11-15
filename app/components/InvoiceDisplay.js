@@ -295,11 +295,11 @@ export default function InvoiceDisplay({ appointment, onClose }) {
           <div ref={printRef} className="invoice-container">
             <div className="flex justify-between items-start mb-8 pb-6 border-b border-gray-200">
               <div className="flex items-start">
-                <div className="mr-4 w-20 h-20 relative">
-                  <img 
-                    src="/logo.png" 
-                    alt="Salon Logo" 
-                    className="w-20 h-20 object-contain"
+                <div className="mr-4 w-32 h-20 relative">
+                  <img
+                    src="/logo2.png"
+                    alt="Glam CRM Logo"
+                    className="w-32 h-20 object-contain"
                   />
                 </div>
                 <div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Navbar from '../../components/Navbar';
+import SalonLayout from '../../components/SalonLayout';
 import InvoiceDisplay from '../../components/InvoiceDisplay';
 import { getAppointmentById } from '../../../lib/db';
 import { useAuth } from '../../../lib/auth';
@@ -93,8 +93,7 @@ function InvoiceContent() {
 
 export default function InvoiceCreatePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-900 dark:to-purple-900">
-      <Navbar />
+    <SalonLayout currentPage="Invoices">
       <Suspense fallback={
         <div className="container mx-auto py-20 text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
@@ -103,6 +102,6 @@ export default function InvoiceCreatePage() {
       }>
         <InvoiceContent />
       </Suspense>
-    </div>
+    </SalonLayout>
   );
 } 
